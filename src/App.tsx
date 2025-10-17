@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { ChangeEvent, useCallback, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import SceneContents from './components/SceneContents.jsx';
+import SceneContents, { type ControlState } from './components/SceneContents';
 import './App.css';
 
-const initialState = {
+const initialState: ControlState = {
   showGround: true,
   showSecond: true,
   showCourtyardGlass: true,
@@ -14,11 +14,18 @@ const initialState = {
 };
 
 export default function App() {
-  const [controls, setControls] = useState(initialState);
+  const [controls, setControls] = useState<ControlState>(initialState);
 
-  const updateControl = (key, value) => {
+  const updateControl = useCallback(<K extends keyof ControlState>(key: K, value: ControlState[K]) => {
     setControls((prev) => ({ ...prev, [key]: value }));
-  };
+  }, []);
+
+  const handleCheckboxChange = useCallback(
+    (key: keyof ControlState) =>
+      (event: ChangeEvent<HTMLInputElement>) =>
+        updateControl(key, event.target.checked),
+    [updateControl],
+  );
 
   return (
     <div className="app">
@@ -45,7 +52,7 @@ export default function App() {
           <input
             type="checkbox"
             checked={controls.showGround}
-            onChange={(event) => updateControl('showGround', event.target.checked)}
+            onChange={handleCheckboxChange('showGround')}
           />
           <span>Ground floor</span>
         </label>
@@ -53,7 +60,7 @@ export default function App() {
           <input
             type="checkbox"
             checked={controls.showSecond}
-            onChange={(event) => updateControl('showSecond', event.target.checked)}
+            onChange={handleCheckboxChange('showSecond')}
           />
           <span>Second floor</span>
         </label>
@@ -61,7 +68,7 @@ export default function App() {
           <input
             type="checkbox"
             checked={controls.showCourtyardGlass}
-            onChange={(event) => updateControl('showCourtyardGlass', event.target.checked)}
+            onChange={handleCheckboxChange('showCourtyardGlass')}
           />
           <span>Courtyard glass 2F</span>
         </label>
@@ -69,7 +76,7 @@ export default function App() {
           <input
             type="checkbox"
             checked={controls.showRoofPlates}
-            onChange={(event) => updateControl('showRoofPlates', event.target.checked)}
+            onChange={handleCheckboxChange('showRoofPlates')}
           />
           <span>Roof plates (massing)</span>
         </label>
@@ -80,7 +87,7 @@ export default function App() {
             <input
               type="checkbox"
               checked={controls.showPlans}
-              onChange={(event) => updateControl('showPlans', event.target.checked)}
+              onChange={handleCheckboxChange('showPlans')}
             />
             <span>Show plans</span>
           </label>
@@ -92,7 +99,9 @@ export default function App() {
               max="1"
               step="0.01"
               value={controls.opacityPlans}
-              onChange={(event) => updateControl('opacityPlans', Number(event.target.value))}
+              onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                updateControl('opacityPlans', Number(event.target.value))
+              }
             />
             <output>{controls.opacityPlans.toFixed(2)}</output>
           </label>

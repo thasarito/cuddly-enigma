@@ -2,6 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
+export interface ControlState {
+  showGround: boolean;
+  showSecond: boolean;
+  showCourtyardGlass: boolean;
+  showRoofPlates: boolean;
+  showPlans: boolean;
+  opacityPlans: number;
+}
+
 const P = {
   courtyard: 8.0,
   gallery: 2.0,
@@ -15,9 +24,68 @@ const MATERIALS = {
   slab: { color: '#dedfe3', metalness: 0, roughness: 0.95 },
   wall: { color: '#eeeeee', metalness: 0, roughness: 0.75 },
   wall2: { color: '#e8edf2', metalness: 0, roughness: 0.75 },
-  glass: { color: '#ffffff', opacity: 0.3, metalness: 0, roughness: 0.2, transmission: 0.9 },
+  glass: {
+    color: '#ffffff',
+    opacity: 0.3,
+    metalness: 0,
+    roughness: 0.2,
+    transmission: 0.9,
+  },
   roof: { color: '#c6b199', metalness: 0, roughness: 0.9 },
 };
+
+type RectBounds = [number, number, number, number];
+type WallBounds = [number, number, number, number];
+type WallMaterial =
+  | THREE.MeshStandardMaterialParameters
+  | THREE.MeshPhysicalMaterialParameters;
+
+interface RectSlabProps {
+  bounds: RectBounds;
+  y: number;
+  height?: number;
+  material?: THREE.MeshStandardMaterialParameters;
+  visible?: boolean;
+}
+
+interface WallSegmentProps {
+  start: [number, number];
+  end: [number, number];
+  y0: number;
+  height: number;
+  thickness?: number;
+  material?: WallMaterial;
+  visible?: boolean;
+}
+
+interface WallLoopProps {
+  bounds: WallBounds;
+  y0: number;
+  height: number;
+  thickness?: number;
+  material?: WallMaterial;
+  visible?: boolean;
+}
+
+interface StairsProps {
+  origin: [number, number];
+  y0: number;
+  width: number;
+  depth: number;
+  rise: number;
+  run: number;
+  steps: number;
+  visible?: boolean;
+}
+
+interface PlanOverlayProps {
+  url: string;
+  y: number;
+  width: number;
+  height: number;
+  visible: boolean;
+  opacity: number;
+}
 
 const cw = P.courtyard;
 const g = P.gallery;
@@ -36,11 +104,14 @@ const zS0 = -(cw / 2 + g);
 const zN0 = cw / 2 + g;
 const zN1 = cw / 2 + g + north;
 
-function RectSlab({ bounds, y, height = P.slab, material = MATERIALS.slab, visible = true }) {
+function RectSlab({ bounds, y, height = P.slab, material = MATERIALS.slab, visible = true }: RectSlabProps) {
   const [xmin, zmin, xmax, zmax] = bounds;
   const width = xmax - xmin;
   const depth = zmax - zmin;
-  const center = useMemo(() => [(xmin + xmax) / 2, y + height / 2, (zmin + zmax) / 2], [xmin, xmax, y, height, zmin, zmax]);
+  const center = useMemo<THREE.Vector3Tuple>(
+    () => [(xmin + xmax) / 2, y + height / 2, (zmin + zmax) / 2],
+    [xmin, xmax, y, height, zmin, zmax],
+  );
 
   return (
     <mesh position={center} castShadow receiveShadow visible={visible}>
@@ -50,27 +121,43 @@ function RectSlab({ bounds, y, height = P.slab, material = MATERIALS.slab, visib
   );
 }
 
-function WallSegment({ start, end, y0, height, thickness = P.wall, material = MATERIALS.wall, visible = true }) {
-  const length = useMemo(() => Math.hypot(end[0] - start[0], end[1] - start[1]) || 0.001, [start, end]);
-  const angle = useMemo(() => Math.atan2(end[1] - start[1], end[0] - start[0]), [start, end]);
-  const position = useMemo(
+function WallSegment({
+  start,
+  end,
+  y0,
+  height,
+  thickness = P.wall,
+  material = MATERIALS.wall,
+  visible = true,
+}: WallSegmentProps) {
+  const length = useMemo<number>(() => Math.hypot(end[0] - start[0], end[1] - start[1]) || 0.001, [start, end]);
+  const angle = useMemo<number>(() => Math.atan2(end[1] - start[1], end[0] - start[0]), [start, end]);
+  const position = useMemo<THREE.Vector3Tuple>(
     () => [(start[0] + end[0]) / 2, y0 + height / 2, (start[1] + end[1]) / 2],
     [start, end, y0, height],
   );
+  const isGlass = material === MATERIALS.glass;
 
   return (
     <mesh position={position} rotation={[0, angle, 0]} castShadow receiveShadow visible={visible}>
       <boxGeometry args={[length, height, thickness]} />
-      {material === MATERIALS.glass ? (
+      {isGlass ? (
         <meshPhysicalMaterial {...MATERIALS.glass} transparent />
       ) : (
-        <meshStandardMaterial {...material} />
+        <meshStandardMaterial {...(material as THREE.MeshStandardMaterialParameters)} />
       )}
     </mesh>
   );
 }
 
-function WallLoop({ bounds, y0, height, thickness = P.wall, material = MATERIALS.wall, visible = true }) {
+function WallLoop({
+  bounds,
+  y0,
+  height,
+  thickness = P.wall,
+  material = MATERIALS.wall,
+  visible = true,
+}: WallLoopProps) {
   const [xmin, zmin, xmax, zmax] = bounds;
   if (!visible) {
     return null;
@@ -85,11 +172,15 @@ function WallLoop({ bounds, y0, height, thickness = P.wall, material = MATERIALS
   );
 }
 
-function Stairs({ origin, y0, width, depth, rise, run, steps, visible = true }) {
+function Stairs({ origin, y0, width, depth, rise, run, steps, visible = true }: StairsProps) {
   const [x, z] = origin;
   const meshes = useMemo(() => {
-    return new Array(steps).fill(0).map((_, i) => {
-      const position = [x, y0 + rise / 2 + i * rise, z - depth / 2 + run / 2 + i * run];
+    return Array.from({ length: steps }, (_, i) => {
+      const position: THREE.Vector3Tuple = [
+        x,
+        y0 + rise / 2 + i * rise,
+        z - depth / 2 + run / 2 + i * run,
+      ];
       return { key: i, position };
     });
   }, [steps, x, y0, z, depth, rise, run]);
@@ -110,13 +201,13 @@ function Stairs({ origin, y0, width, depth, rise, run, steps, visible = true }) 
   );
 }
 
-function PlanOverlay({ url, y, width, height, visible, opacity }) {
+function PlanOverlay({ url, y, width, height, visible, opacity }: PlanOverlayProps) {
   const { gl } = useThree();
-  const [texture, setTexture] = useState(null);
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    let loadedTexture = null;
+    let loadedTexture: THREE.Texture | null = null;
     if (!url) {
       setTexture(null);
       return undefined;
@@ -158,7 +249,11 @@ function PlanOverlay({ url, y, width, height, visible, opacity }) {
   );
 }
 
-export default function SceneContents({ controls }) {
+interface SceneContentsProps {
+  controls: ControlState;
+}
+
+export default function SceneContents({ controls }: SceneContentsProps) {
   const { showGround, showSecond, showCourtyardGlass, showRoofPlates, showPlans, opacityPlans } = controls;
   const { scene, gl } = useThree();
 
@@ -175,8 +270,11 @@ export default function SceneContents({ controls }) {
   const y1 = P.story[0] + P.slab;
   const guardHeight = 1.1;
   const railThickness = 0.06;
-  const gridHelper = useMemo(() => new THREE.GridHelper(120, 120, 0x666666, 0xdddddd), []);
-  const axesHelper = useMemo(() => new THREE.AxesHelper(3), []);
+  const gridHelper = useMemo<THREE.GridHelper>(
+    () => new THREE.GridHelper(120, 120, 0x666666, 0xdddddd),
+    [],
+  );
+  const axesHelper = useMemo<THREE.AxesHelper>(() => new THREE.AxesHelper(3), []);
 
   return (
     <>

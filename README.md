@@ -19,7 +19,7 @@ This project boots a Vite + React + React Three Fiber scene that rebuilds the ed
 - Coordinates follow the house plan convention (X → East, Z → North, 1 unit = 1 m).
 - Toggle ground floor, second floor, courtyard glass, roof plates, and blueprint overlays from the control panel.
 - Optional plan overlays: add `plan_1f.png` and `plan_2f.png` to the `public/` folder to align your drawings. Adjust opacity in the panel.
-- Parameterized dimensions (courtyard size, wing extents, floor heights) defined at the top of `src/components/SceneContents.jsx` for quick refinement.
+- Parameterized dimensions (courtyard size, wing extents, floor heights) defined at the top of `src/components/SceneContents.tsx` for quick refinement.
 
 ## Building for production
 
