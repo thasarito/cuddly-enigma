@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2000 -2000 32000 22000">
+  <defs>
+    <style>
+      svg{background:none}
+      .site{stroke:#000;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .walls_ext{stroke:#000;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .walls_int{stroke:#000;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .doors{stroke:#000;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .windows{stroke:#000;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .terraces{stroke:#000;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .roof{stroke:#000;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .text{fill:#000;font-family:Arial,Helvetica,sans-serif;font-size:300px}
+    </style>
+  </defs>
+  <!-- Htotal = 22000 user units (22 m including 2 m margin each side in the viewBox) -->
+  <g transform="scale(1,-1) translate(0,-22000)">
+    <!-- SITE BOUNDARY (origin at 0,0) -->
+    <polygon class="site" points="0,0 28000,0 28000,18000 0,18000"/>
+    <!-- ===== EXTERNAL WALLS (t=200 mm) ===== -->
+    <!-- Building footprint: 22x12 m from (3000,3000) to (25000,15000) -->
+    <!-- West wall -->
+    <polygon class="walls_ext" points="3000,3000 3200,3000 3200,15000 3000,15000 3000,3000"/>
+    <!-- East wall -->
+    <polygon class="walls_ext" points="24800,3000 25000,3000 25000,15000 24800,15000 24800,3000"/>
+    <!-- North wall -->
+    <polygon class="walls_ext" points="3000,14800 25000,14800 25000,15000 3000,15000 3000,14800"/>
+    <!-- South wall with main entrance opening (1.5 m clear) -->
+    <polygon class="walls_ext" points="3000,3000 9500,3000 9500,3200 3000,3200 3000,3000"/>
+    <polygon class="walls_ext" points="11000,3000 25000,3000 25000,3200 11000,3200 11000,3000"/>
+    <!-- ===== INTERNAL WALLS (t=120 mm) ===== -->
+    <!-- Left block vertical spine -->
+    <polygon class="walls_int" points="8000,3000 8120,3000 8120,15000 8000,15000 8000,3000"/>
+    <!-- Left block horizontals -->
+    <polygon class="walls_int" points="3200,6000 8000,6000 8000,6120 3200,6120 3200,6000"/>
+    <polygon class="walls_int" points="3200,8000 8000,8000 8000,8120 3200,8120 3200,8000"/>
+    <polygon class="walls_int" points="3200,10000 8000,10000 8000,10120 3200,10120 3200,10000"/>
+    <polygon class="walls_int" points="3200,12000 8000,12000 8000,12120 3200,12120 3200,12000"/>
+    <!-- Pantry/Dining divider -->
+    <polygon class="walls_int" points="17000,3000 17120,3000 17120,8000 17000,8000 17000,3000"/>
+    <!-- Living bottom -->
+    <polygon class="walls_int" points="19000,9000 25000,9000 25000,9120 19000,9120 19000,9000"/>
+    <!-- Morning room / courtyard divider -->
+    <polygon class="walls_int" points="11000,13000 17000,13000 17000,13120 11000,13120 11000,13000"/>
+    <!-- Foyer/Shoe separation -->
+    <polygon class="walls_int" points="9800,5000 11000,5000 11000,5120 9800,5120 9800,5000"/>
+    <polygon class="walls_int" points="9800,3000 9920,3000 9920,6000 9800,6000 9800,3000"/>
+    <!-- ===== COURTYARD outline (no hatch) ===== -->
+    <!-- COURTYARD: 8 x 6 m -->
+    <polygon class="site" points="11000,7000 19000,7000 19000,13000 11000,13000 11000,7000"/>
+    <!-- ===== WINDOWS (double jambs at openings) ===== -->
+    <!-- Glazing to courtyard: south edge -->
+    <polyline class="windows" points="11000,7000 19000,7000"/>
+    <polyline class="windows" points="11000,7120 19000,7120"/>
+    <!-- Glazing to courtyard: west and east edges -->
+    <polyline class="windows" points="11000,7000 11000,13000"/>
+    <polyline class="windows" points="11120,7000 11120,13000"/>
+    <polyline class="windows" points="19000,7000 19000,13000"/>
+    <polyline class="windows" points="18880,7000 18880,13000"/>
+    <!-- ===== TERRACES ===== -->
+    <!-- Dining terrace (E) -->
+    <polygon class="terraces" points="25000,3000 27000,3000 27000,8000 25000,8000 25000,3000"/>
+    <!-- Living terrace (E) -->
+    <polygon class="terraces" points="25000,12000 27000,12000 27000,15000 25000,15000 25000,12000"/>
+    <!-- ===== DOORS (900 mm leaves, 40 mm thick) ===== -->
+    <!-- Main entrance door (hinge at 9500,3200; swings inward 90°) -->
+    <polygon class="doors" points="9500,3200 9500,3240 10400,3240 10400,3200 9500,3200"/>
+    <path class="doors" d="M10400,3200 A900,900 0 0 1 9500,4100"/>
+    <!-- Door from Foyer to Pantry -->
+    <polygon class="doors" points="11120,4200 11120,4240 12020,4240 12020,4200 11120,4200"/>
+    <path class="doors" d="M12020,4200 A900,900 0 0 1 11120,5100"/>
+    <!-- Door to Kitchen from corridor -->
+    <polygon class="doors" points="8120,4400 8160,4400 8160,5300 8120,5300 8120,4400"/>
+    <path class="doors" d="M8120,5300 A900,900 0 0 1 9020,4400"/>
+    <!-- Door to Guest Room from corridor -->
+    <polygon class="doors" points="8120,13200 8160,13200 8160,14100 8120,14100 8120,13200"/>
+    <path class="doors" d="M8120,14100 A900,900 0 0 1 9020,13200"/>
+    <!-- ===== ROOM LABELS ===== -->
+  </g>
+  <!-- Text is drawn in screen coordinates (flipped back up) -->
+  <g transform="translate(0,22000) scale(1,-1)">
+    <text class="text" x="5600" y="4500" text-anchor="middle">KITCHEN</text>
+    <text class="text" x="5600" y="7000" text-anchor="middle">STORAGE</text>
+    <text class="text" x="5600" y="9000" text-anchor="middle">LAUNDRY</text>
+    <text class="text" x="5600" y="11000" text-anchor="middle">BATHROOM</text>
+    <text class="text" x="5600" y="13500" text-anchor="middle">GUEST ROOM</text>
+    <text class="text" x="8900" y="15500" text-anchor="middle">FITNESS</text>
+    <text class="text" x="8900" y="11100" text-anchor="middle">POWDER ROOM</text>
+    <text class="text" x="10400" y="3600" text-anchor="middle">FOYER</text>
+    <text class="text" x="10400" y="5600" text-anchor="middle">SHOE ROOM</text>
+    <text class="text" x="14000" y="5200" text-anchor="middle">PANTRY</text>
+    <text class="text" x="21000" y="5200" text-anchor="middle">DINING</text>
+    <text class="text" x="21000" y="12000" text-anchor="middle">LIVING</text>
+    <text class="text" x="14000" y="14200" text-anchor="middle">MORNING ROOM</text>
+    <text class="text" x="15000" y="10200" text-anchor="middle">COURTYARD</text>
+    <text class="text" x="26000" y="5600" text-anchor="middle">TERRACE</text>
+    <text class="text" x="26000" y="13600" text-anchor="middle">TERRACE</text>
+  </g>
+</svg>
